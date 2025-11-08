@@ -1,7 +1,7 @@
 
 #include "raylib.h"
 
-#define MAX_ENEMIES 10
+#define MAX_ENEMIES 40
 
 // Create enemy class
 typedef struct {
@@ -40,26 +40,10 @@ int main(void) {
 
     // Store enemies into array
     Enemy enemies[MAX_ENEMIES];
-
-    // Randomize enemy stats
-    for (int i=0; i<MAX_ENEMIES; i++) {
-        enemies[i].pos = (Vector2) {GetRandomValue(0, screenwidth), GetRandomValue(0, screenheight*0.7f)};
-
-        // Cant randomize velocity direction between -1 and 1 (could get 0). Instead, convert 2 outcomes
-        float dirx;
-        if (GetRandomValue(0, 1) == 0) {
-            dirx = -1;
-        }
-        else {
-            dirx = 1;
-        }
-        enemies[i].vel = (Vector2) {dirx, 0};
-        enemies[i].speed = GetRandomValue(100, 300);
-    }
-
-
-
-
+    int enemyCount = 0;
+    int currentLevel = 1;
+    LoadLevel(currentLevel, enemies, &enemyCount, screenwidth, screenheight);
+    
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
@@ -71,12 +55,14 @@ int main(void) {
             DrawText("100 100 HERE", 100, 100, 50, RED);
         }
 
+        // TODO: Check if level is over, and if so, currentLevel++, LoadLevel()
+
         BeginDrawing();
         ClearBackground(DARKGREEN);
         // Draw player
         DrawCircleV(player.pos, 20, RED);
         // Draw all enemies
-        for (int i=0; i<MAX_ENEMIES; i++) {
+        for (int i=0; i<enemyCount; i++) {
             DrawCircleV(enemies[i].pos, 10, BLUE);
         }
         DrawText("WASD to move", 10, 10, 20, WHITE);
@@ -122,5 +108,38 @@ void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight) {
             enemies[i].pos.x = 0;
             enemies[i].vel.x = 1.0;
         }
+    }
+}
+
+void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight) {
+    // Vary enemy count based on level
+    switch (level) {
+        case 1:
+            *enemyCount = 10;
+            break;
+        case 2:
+            *enemyCount = 20;
+            break;
+        case 3:
+            *enemyCount = 30;
+            break;
+        case 4:
+            *enemyCount = 40;
+    }
+
+    // Randomize enemy stats
+    for (int i=0; i<*enemyCount; i++) {
+        enemies[i].pos = (Vector2) {GetRandomValue(0, screenwidth), GetRandomValue(0, screenheight*0.7f)};
+
+        // Cant randomize velocity direction between -1 and 1 (could get 0). Instead, convert 2 outcomes
+        float dirx;
+        if (GetRandomValue(0, 1) == 0) {
+            dirx = -1;
+        }
+        else {
+            dirx = 1;
+        }
+        enemies[i].vel = (Vector2) {dirx, 0};
+        enemies[i].speed = GetRandomValue(100, 300);
     }
 }
