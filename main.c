@@ -12,7 +12,15 @@ typedef struct {
     bool alive;
 } Enemy;
 
+// Create player
+typedef struct {
+    Vector2 pos;
+    Vector2 vel;
+    float speed;
+    bool alive;
+} Player;
 
+void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
 
 int main(void) {
@@ -22,14 +30,11 @@ int main(void) {
     int screenwidth = GetScreenWidth();
     int screenheight = GetScreenHeight();
 
-    // Controls character position (float x, float y)
-    Vector2 pos = {screenwidth/2, screenheight*0.8};
-
-    // Controls character direction, where {-1.0f, 0.0f} points left
-    Vector2 vel = {1.0f, 0.0f};
-
-    // Speed of character
-    float speed = 200.0f;
+    // Initialize player's attributes
+    Player player;
+    player.pos = (Vector2) {screenwidth/2, screenheight*0.8};
+    player.speed = 200.0f;
+    player.alive = 1;
 
     // Store enemies into array
     Enemy enemies[MAX_ENEMIES];
@@ -56,12 +61,7 @@ int main(void) {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
-        if (IsKeyDown(KEY_W)) pos.y -= speed * dt;
-        if (IsKeyDown(KEY_S)) pos.y += speed * dt;
-        if (IsKeyDown(KEY_A)) pos.x -= speed * dt;
-        if (IsKeyDown(KEY_D)) pos.x += speed * dt;
-
-
+        PlayerMove(&player, dt, screenwidth, screenheight);
         EnemiesMove(enemies, dt, screenwidth, screenheight);
 
         if (IsKeyDown(KEY_SPACE)) {
@@ -69,10 +69,10 @@ int main(void) {
             DrawText("100 100 HERE", 100, 100, 50, RED);
         }
 
-
         BeginDrawing();
         ClearBackground(DARKGREEN);
-        DrawCircleV(pos, 20, RED);
+        // Draw player
+        DrawCircleV(player.pos, 20, RED);
         // Draw all enemies
         for (int i=0; i<MAX_ENEMIES; i++) {
             DrawCircleV(enemies[i].pos, 10, BLUE);
@@ -85,7 +85,12 @@ int main(void) {
 }
 
 
-    
+void PlayerMove(Player *player, float dt, int screenwidth, int screenheight) {
+    if (IsKeyDown(KEY_W)) player->pos.y -= player->speed * dt;
+    if (IsKeyDown(KEY_S)) player->pos.y += player->speed * dt;
+    if (IsKeyDown(KEY_A)) player->pos.x -= player->speed * dt;
+    if (IsKeyDown(KEY_D)) player->pos.x += player->speed * dt;
+}
 
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight) {
     for (int i=0; i<MAX_ENEMIES; i++) {
