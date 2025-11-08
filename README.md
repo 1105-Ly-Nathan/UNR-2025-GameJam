@@ -1,4 +1,4 @@
-## USE git pull FREQUENTLY!!!
+# USE git pull FREQUENTLY!!!
 
 # README.md is a MarkDown file. Look up markdown syntax if you're interested in changing text size and stuff
 # Instructions
