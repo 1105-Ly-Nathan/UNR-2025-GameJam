@@ -13,3 +13,6 @@ After coding, push it.
 
 After you've done git push -u... can now just do git push and git pull without the retyping that branch name.
 Note: For a future, new branch, must redo git push -u origin new_branch, and only then can you do git push and git pull without the branch name.
+
+# Compile command
+gcc main.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o main && ./main
