@@ -15,9 +15,10 @@ typedef struct {
 // Create player
 typedef struct {
     Vector2 pos;
-    Vector2 vel;
+    Vector2 vel; // Player direction, no current use implemented yet
     float speed;
     bool alive;
+    float upper_y; // How far player can move up the screen
 } Player;
 
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
@@ -32,9 +33,10 @@ int main(void) {
 
     // Initialize player's attributes
     Player player;
-    player.pos = (Vector2) {screenwidth/2, screenheight*0.8};
+    player.pos = (Vector2) {screenwidth/2, screenheight*0.8f};
     player.speed = 200.0f;
     player.alive = 1;
+    player.upper_y = screenheight * 0.7f;
 
     // Store enemies into array
     Enemy enemies[MAX_ENEMIES];
@@ -86,10 +88,26 @@ int main(void) {
 
 
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight) {
+
     if (IsKeyDown(KEY_W)) player->pos.y -= player->speed * dt;
     if (IsKeyDown(KEY_S)) player->pos.y += player->speed * dt;
     if (IsKeyDown(KEY_A)) player->pos.x -= player->speed * dt;
     if (IsKeyDown(KEY_D)) player->pos.x += player->speed * dt;
+
+    // Add movement bounds
+    if (player->pos.x > screenwidth) {
+        player->pos.x = screenwidth;
+    }
+    else if (player->pos.x < 0) {
+        player->pos.x = 0;   
+    }
+
+    if (player->pos.y < player->upper_y) {
+        player->pos.y = player->upper_y;
+    }
+    else if (player->pos.y > screenheight) {
+        player->pos.y = screenheight;
+    }
 }
 
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight) {
