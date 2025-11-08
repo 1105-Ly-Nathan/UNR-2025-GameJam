@@ -23,6 +23,7 @@ typedef struct {
 
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
+void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight);
 
 int main(void) {
     InitWindow(800, 600, "WASD to move");
