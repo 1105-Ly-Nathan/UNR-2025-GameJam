@@ -17,7 +17,8 @@ int main(void) {
         if (IsKeyDown(KEY_D)) pos.x += speed * dt;
 
         if (IsKeyDown(KEY_SPACE)) {
-            DrawText("TESTING", 30, 30, 30, RED);
+            DrawText("TESTING", 30, 30, 50, BLUE);
+            DrawText("100 100 HERE", 100, 100, 50, RED);
         
         }
 
