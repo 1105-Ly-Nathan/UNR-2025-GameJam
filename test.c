@@ -1,4 +1,5 @@
 // test.c - FIXED & CLEAN (no Clamp/Vector2Add needed)
+//gcc test.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o test
 #include "raylib.h"
 
 #define MAX_ENEMIES 30
