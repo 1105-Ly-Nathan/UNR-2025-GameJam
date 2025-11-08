@@ -4,7 +4,7 @@
 void AutoMove(Vector2 *pos, Vector2 *vel, float speed, float dt, int screenwidth, int screenheight);
 
 int main(void) {
-    InitWindow(800, 600, "Top-down walker - WASD");
+    InitWindow(800, 600, "WASD to move");
     SetTargetFPS(60);
 
     int screenwidth = GetScreenWidth();
@@ -15,7 +15,18 @@ int main(void) {
 
     // Controls character direction, where {-1.0f, 0.0f} points left
     Vector2 vel = {1.0f, 0.0f};
+
+    // Speed of character
     float speed = 200.0f;
+
+    // Create enemy class
+    typedef struct {
+        Vector2 pos;
+        Vector2 vel;
+        Vector2 accel;
+    } Enemy;
+
+
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -46,8 +57,8 @@ int main(void) {
 }
 
 void AutoMove(Vector2 *pos, Vector2 *vel, float speed, float dt, int screenwidth, int screenheight) {
-    // We have position's address, or pointer, as input. Get the pos struct, then access x member
-    // Or alternatively, shorthand. Follow pointer to its destination, getting that value. Leaving here for learning purposes.
+    // We have position's address, or pointer, as input. Get the pos struct, then access x member with (*pos).x
+    // Or alternatively, shorthand pos->x   Leaving here for learning purposes.
     // Move the character right, then bounce off the wall and back
     (*pos).x += vel->x * speed * dt;
 
