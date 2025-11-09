@@ -21,6 +21,14 @@ typedef struct {
     float upper_y; // How far player can move up the screen
 } Player;
 
+typedef enum {
+    SCREEN_TITLE,
+    SCREEN_PLAYING,
+    SCREEN_LEVEL_TRANSITION,
+    SCREEN_UPGRADES,
+    SCREEN_GAME_OVER
+} GameScreen;
+
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
 void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight);
@@ -44,9 +52,31 @@ int main(void) {
     int enemyCount = 0;
     int currentLevel = 1;
     LoadLevel(currentLevel, enemies, &enemyCount, screenwidth, screenheight);
+
+    // Initialize our current screen as title
+    GameScreen currentScreen;
+    currentScreen = SCREEN_TITLE;
     
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
+
+        switch (currentScreen) {
+            case SCREEN_TITLE:
+                TitleScreenUpdate(&currentScreen);
+                break;
+            case SCREEN_PLAYING:
+                GameplayUpdate();
+                break;
+            case SCREEN_LEVEL_TRANSITION:
+                LevelTransitionUpdate();
+                break;
+            case SCREEN_UPGRADES:
+                UpgradesUpdate();
+                break;
+            case SCREEN_GAME_OVER:
+                GameOverUpdate();
+                break;
+        }
 
         PlayerMove(&player, dt, screenwidth, screenheight);
         EnemiesMove(enemies, dt, screenwidth, screenheight);
