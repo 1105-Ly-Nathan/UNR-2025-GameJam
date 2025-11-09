@@ -26,14 +26,18 @@ typedef enum {
     SCREEN_PLAYING,
     SCREEN_LEVEL_TRANSITION,
     SCREEN_UPGRADES,
-    SCREEN_GAME_OVER
+    SCREEN_GAME_OVER,
+    SCREEN_VICTORY
 } GameScreen;
 
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
 void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight);
 void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenheight);
-void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight);
+void GameplayUpdate(GameScreen *currentScreen, Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight);
+void LevelTransitionUpdate(GameScreen *currentScreen, int *currentLevel, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight);
+void UpgradesUpdate();
+void GameOverUpdate();
 
 int main(void) {
     InitWindow(800, 600, "WASD to move");
@@ -53,8 +57,6 @@ int main(void) {
     Enemy enemies[MAX_ENEMIES];
     int enemyCount = 0;
     int currentLevel = 1;
-    LoadLevel(currentLevel, enemies, &enemyCount, screenwidth, screenheight);
-
     // Initialize our current screen as title
     GameScreen currentScreen;
     currentScreen = SCREEN_TITLE;
@@ -69,10 +71,10 @@ int main(void) {
                 TitleScreenUpdate(&currentScreen, screenwidth, screenheight);
                 break;
             case SCREEN_PLAYING:
-                GameplayUpdate(&player, enemies, enemyCount, dt, screenwidth, screenheight);
+                GameplayUpdate(&currentScreen, &player, enemies, enemyCount, dt, screenwidth, screenheight);
                 break;
             case SCREEN_LEVEL_TRANSITION:
-                LevelTransitionUpdate();
+                LevelTransitionUpdate(&currentScreen, &currentLevel, enemies, &enemyCount, screenwidth, screenheight);
                 break;
             case SCREEN_UPGRADES:
                 UpgradesUpdate();
@@ -151,6 +153,7 @@ void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int
             break;
         case 4:
             *enemyCount = 40;
+            break;
     }
 
     // Randomize enemy stats
@@ -176,7 +179,7 @@ void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenhei
     int fontSize = 60;
     int titleWidth = MeasureText(title, fontSize);
     int posX = (screenwidth - titleWidth)/2;
-    int posY = screenheight * 0.2;
+    int posY = screenheight * 0.2f;
     DrawText(title, posX, posY, fontSize, WHITE);
 
     // Write instructions
@@ -184,14 +187,14 @@ void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenhei
     int instructionsFontSize = 20;
     int instructionsWidth = MeasureText(instructions, instructionsFontSize);
     int instructX = (screenwidth - instructionsWidth)/2;
-    int instructY = screenheight * 0.7;
+    int instructY = screenheight * 0.7f;
     DrawText(instructions, instructX, instructY, instructionsFontSize, GREEN);
     if (IsKeyDown(KEY_SPACE)) {
-        *currentScreen = SCREEN_PLAYING;
+        *currentScreen = SCREEN_LEVEL_TRANSITION;
     }
 }
 
-void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight) {
+void GameplayUpdate(GameScreen *currentScreen, Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight) {
     PlayerMove(player, dt, screenwidth, screenheight);
     EnemiesMove(enemies, dt, screenwidth, screenheight);
     // Draw player
@@ -202,7 +205,39 @@ void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, i
     }
 }
 
-void LevelTransitionUpdate() {
+void LevelTransitionUpdate(GameScreen *currentScreen, int *currentLevel, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight) {
+    // Change to victory screen if at level 4 already
+    if (*currentLevel == 4) {
+        *currentScreen = SCREEN_VICTORY;
+        return;
+    }
+    
+    // Show level 1 when first starting game
+    int fontSize = 60;
+    char text[] = "LEVEL 1";
+    int textWidth = MeasureText(text, fontSize);
+    int posX = (screenwidth - textWidth)/2;
+    int posY = screenheight * 0.2f;
+    if (*currentLevel == 1) {
+        DrawText(text, posX, posY, fontSize, RED);
+    }
+    // Otherwise increase the level and display it
+    else {
+        *currentLevel++;
+        char *text = TextFormat("LEVEL %d", *currentLevel);
+        DrawText(text, posX, posY, fontSize, RED);
+    }
+
+    char instructions[] = "Press SPACE to continue";
+    int instructionsFontSize = 20;
+    int instructionsWidth = MeasureText(instructions, instructionsFontSize);
+    int instructX = (screenwidth - instructionsWidth)/2;
+    int instructY = screenheight * 0.7f;
+    DrawText(instructions, instructX, instructY, instructionsFontSize, GREEN);
+    if (IsKeyDown(KEY_SPACE)) {
+        *currentScreen = SCREEN_PLAYING;
+        LoadLevel(*currentLevel, enemies, enemyCount, screenwidth, screenheight);
+    }
 
 }
 
