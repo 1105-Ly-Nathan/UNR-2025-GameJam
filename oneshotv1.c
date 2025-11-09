@@ -1,7 +1,7 @@
-// oneshotv1.c - ONE SHOT, ONE KILL
-//compile and run with
-//gcc -o oneshotv1 oneshotv1.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./oneshotv1
-// oneshotv1.c - FINAL, WORKING, EVERYTHING FIXED
+// Authors: Matthew Johnson and Nathan Ly 
+// GameJam
+// gcc -o oneshotv1 oneshotv1.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./oneshotv1
+
 #include "raylib.h"
 #include <math.h>
 #include <string.h>
