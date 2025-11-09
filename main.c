@@ -32,6 +32,8 @@ typedef enum {
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
 void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight);
+void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenheight);
+void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight);
 
 int main(void) {
     InitWindow(800, 600, "WASD to move");
@@ -59,13 +61,15 @@ int main(void) {
     
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
-
+        BeginDrawing();
+        ClearBackground(BLACK);
+        
         switch (currentScreen) {
             case SCREEN_TITLE:
-                TitleScreenUpdate(&currentScreen);
+                TitleScreenUpdate(&currentScreen, screenwidth, screenheight);
                 break;
             case SCREEN_PLAYING:
-                GameplayUpdate();
+                GameplayUpdate(&player, enemies, enemyCount, dt, screenwidth, screenheight);
                 break;
             case SCREEN_LEVEL_TRANSITION:
                 LevelTransitionUpdate();
@@ -78,8 +82,7 @@ int main(void) {
                 break;
         }
 
-        PlayerMove(&player, dt, screenwidth, screenheight);
-        EnemiesMove(enemies, dt, screenwidth, screenheight);
+        
 
         if (IsKeyDown(KEY_SPACE)) {
             DrawText("TESTING", 30, 30, 50, BLUE);
@@ -88,14 +91,6 @@ int main(void) {
 
         // TODO: Check if level is over, and if so, currentLevel++, LoadLevel()
 
-        BeginDrawing();
-        ClearBackground(DARKGREEN);
-        // Draw player
-        DrawCircleV(player.pos, 20, RED);
-        // Draw all enemies
-        for (int i=0; i<enemyCount; i++) {
-            DrawCircleV(enemies[i].pos, 10, BLUE);
-        }
         DrawText("WASD to move", 10, 10, 20, WHITE);
         EndDrawing();
     }
@@ -173,4 +168,48 @@ void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int
         enemies[i].vel = (Vector2) {dirx, 0};
         enemies[i].speed = GetRandomValue(100, 300);
     }
+}
+
+void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenheight) {
+    // Title
+    char title[] = "TEST NAME";
+    int fontSize = 60;
+    int titleWidth = MeasureText(title, fontSize);
+    int posX = (screenwidth - titleWidth)/2;
+    int posY = screenheight * 0.2;
+    DrawText(title, posX, posY, fontSize, WHITE);
+
+    // Write instructions
+    char instructions[] = "Press SPACE to start!";
+    int instructionsFontSize = 20;
+    int instructionsWidth = MeasureText(instructions, instructionsFontSize);
+    int instructX = (screenwidth - instructionsWidth)/2;
+    int instructY = screenheight * 0.7;
+    DrawText(instructions, instructX, instructY, instructionsFontSize, GREEN);
+    if (IsKeyDown(KEY_SPACE)) {
+        *currentScreen = SCREEN_PLAYING;
+    }
+}
+
+void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight) {
+    PlayerMove(player, dt, screenwidth, screenheight);
+    EnemiesMove(enemies, dt, screenwidth, screenheight);
+    // Draw player
+    DrawCircleV(player->pos, 20, RED);
+    // Draw all enemies
+    for (int i=0; i<enemyCount; i++) {
+        DrawCircleV(enemies[i].pos, 10, BLUE);
+    }
+}
+
+void LevelTransitionUpdate() {
+
+}
+
+void UpgradesUpdate() {
+
+}
+
+void GameOverUpdate() {
+
 }
