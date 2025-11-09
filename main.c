@@ -2,6 +2,9 @@
 #include "raylib.h"
 
 #define MAX_ENEMIES 40
+#define MAX_ENEMIES   10
+#define MAX_BULLETS   50
+#define MAX_SHRAPNEL  64
 
 // Create enemy class
 typedef struct {
@@ -29,6 +32,21 @@ typedef enum {
     SCREEN_GAME_OVER,
     SCREEN_VICTORY
 } GameScreen;
+
+typedef enum { BASIC, GRENADE, LASER } GunType;
+
+typedef struct {
+    Vector2 pos, vel;
+    float   timer;
+    int     type;
+    bool    active;
+} Bullet;
+
+typedef struct {
+    Vector2 pos, vel;
+    float   life;
+    bool    active;
+} Shrapnel;
 
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
@@ -60,6 +78,9 @@ int main(void) {
     // Initialize our current screen as title
     GameScreen currentScreen;
     currentScreen = SCREEN_TITLE;
+
+    // Initialize gun
+    GunType gun = BASIC;
     
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
