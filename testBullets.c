@@ -1,3 +1,6 @@
+//compile with:
+//gcc -o testBullets testBullets.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./testBullets
+
 #include "raylib.h"
 #include <math.h>
 
