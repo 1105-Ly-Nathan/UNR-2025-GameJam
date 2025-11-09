@@ -15,9 +15,9 @@ CONTROLS
 
 WASD - Move 
 1-4 - Select weapon
-E-Fire / Hold for Laser
+E - Fire
 M - Return to menu
-0-Toggle DEV MODE (999 everything)
+0 - Toggle DEV MODE (999 everything)
 
 WEAPONS
 
