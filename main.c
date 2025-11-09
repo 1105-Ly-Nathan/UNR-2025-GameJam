@@ -100,12 +100,6 @@ int main(void) {
     return 0;
 }
 
-void AutoMove(Vector2 *pos, Vector2 *vel, float speed, float dt, int screenwidth, int screenheight) {
-    // We have position's address, or pointer, as input. Get the pos struct, then access x member with (*pos).x
-    // Or alternatively, shorthand pos->x   Leaving here for learning purposes.
-    // Move the character right, then bounce off the wall and back
-    (*pos).x += vel->x * speed * dt;
-
 void PlayerMove(Player *player, float dt, int screenwidth, int screenheight) {
 
     if (IsKeyDown(KEY_W)) player->pos.y -= player->speed * dt;
