@@ -45,6 +45,7 @@ gcc main.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o main && ./main
 - Remove automove
 - Complete player movement
 - Beginnings of level design
+- Title Screen (Good enough for now)
 
 # FUTURE TODO's (No particular order)
 - Function to check if level is done.
