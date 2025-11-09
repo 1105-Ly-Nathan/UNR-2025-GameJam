@@ -1,7 +1,7 @@
 
 #include "raylib.h"
 
-#define MAX_ENEMIES 10
+#define MAX_ENEMIES 40
 
 // Create enemy class
 typedef struct {
@@ -12,20 +12,28 @@ typedef struct {
     bool alive;
 } Enemy;
 
+// Create player
 typedef struct {
     Vector2 pos;
-    Vector2 vel;
-    Vector2 accel;
+    Vector2 vel; // Player direction, no current use implemented yet
     float speed;
     bool alive;
-    float radius;
-    Color color;
+    float upper_y; // How far player can move up the screen
+} Player;
 
-} BasicBoolit;
+typedef enum {
+    SCREEN_TITLE,
+    SCREEN_PLAYING,
+    SCREEN_LEVEL_TRANSITION,
+    SCREEN_UPGRADES,
+    SCREEN_GAME_OVER
+} GameScreen;
 
-
-void AutoMove(Vector2 *pos, Vector2 *vel, float speed, float dt, int screenwidth, int screenheight);
+void PlayerMove(Player *player, float dt, int screenwidth, int screenheight);
 void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight);
+void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight);
+void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenheight);
+void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight);
 
 int main(void) {
     InitWindow(800, 600, "WASD to move");
@@ -34,62 +42,55 @@ int main(void) {
     int screenwidth = GetScreenWidth();
     int screenheight = GetScreenHeight();
 
-    // Controls character position (float x, float y)
-    Vector2 pos = {screenwidth/2, screenheight*0.8};
-
-    // Controls character direction, where {-1.0f, 0.0f} points left
-    Vector2 vel = {1.0f, 0.0f};
-
-    // Speed of character
-    float speed = 200.0f;
+    // Initialize player's attributes
+    Player player;
+    player.pos = (Vector2) {screenwidth/2, screenheight*0.8f};
+    player.speed = 200.0f;
+    player.alive = 1;
+    player.upper_y = screenheight * 0.7f;
 
     // Store enemies into array
     Enemy enemies[MAX_ENEMIES];
+    int enemyCount = 0;
+    int currentLevel = 1;
+    LoadLevel(currentLevel, enemies, &enemyCount, screenwidth, screenheight);
 
-    // Randomize enemy stats
-    for (int i=0; i<MAX_ENEMIES; i++) {
-        enemies[i].pos = (Vector2) {GetRandomValue(0, screenwidth), GetRandomValue(0, screenheight*0.7f)};
-
-        // Cant randomize velocity direction between -1 and 1 (could get 0). Instead, convert 2 outcomes
-        float dirx;
-        if (GetRandomValue(0, 1) == 0) {
-            dirx = -1;
-        }
-        else {
-            dirx = 1;
-        }
-        enemies[i].vel = (Vector2) {dirx, 0};
-        enemies[i].speed = GetRandomValue(100, 300);
-    }
-
-
-
-
+    // Initialize our current screen as title
+    GameScreen currentScreen;
+    currentScreen = SCREEN_TITLE;
+    
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
+        BeginDrawing();
+        ClearBackground(BLACK);
+        
+        switch (currentScreen) {
+            case SCREEN_TITLE:
+                TitleScreenUpdate(&currentScreen, screenwidth, screenheight);
+                break;
+            case SCREEN_PLAYING:
+                GameplayUpdate(&player, enemies, enemyCount, dt, screenwidth, screenheight);
+                break;
+            case SCREEN_LEVEL_TRANSITION:
+                LevelTransitionUpdate();
+                break;
+            case SCREEN_UPGRADES:
+                UpgradesUpdate();
+                break;
+            case SCREEN_GAME_OVER:
+                GameOverUpdate();
+                break;
+        }
 
-        if (IsKeyDown(KEY_W)) pos.y -= speed * dt;
-        if (IsKeyDown(KEY_S)) pos.y += speed * dt;
-        if (IsKeyDown(KEY_A)) pos.x -= speed * dt;
-        if (IsKeyDown(KEY_D)) pos.x += speed * dt;
-
-        // Auto movement
-        AutoMove(&pos, &vel, speed, dt, screenwidth, screenheight);
-        EnemiesMove(enemies, dt, screenwidth, screenheight);
+        
 
         if (IsKeyDown(KEY_SPACE)) {
             DrawText("TESTING", 30, 30, 50, BLUE);
             DrawText("100 100 HERE", 100, 100, 50, RED);
         }
 
+        // TODO: Check if level is over, and if so, currentLevel++, LoadLevel()
 
-        BeginDrawing();
-        ClearBackground(DARKGREEN);
-        DrawCircleV(pos, 20, RED);
-        // Draw all enemies
-        for (int i=0; i<MAX_ENEMIES; i++) {
-            DrawCircleV(enemies[i].pos, 10, BLUE);
-        }
         DrawText("WASD to move", 10, 10, 20, WHITE);
         EndDrawing();
     }
@@ -103,15 +104,26 @@ void AutoMove(Vector2 *pos, Vector2 *vel, float speed, float dt, int screenwidth
     // Move the character right, then bounce off the wall and back
     (*pos).x += vel->x * speed * dt;
 
-    // Bounce off Right wall
-    if (pos->x > screenwidth) {
-        pos->x = screenwidth;
-        vel->x = -1.0;
+void PlayerMove(Player *player, float dt, int screenwidth, int screenheight) {
+
+    if (IsKeyDown(KEY_W)) player->pos.y -= player->speed * dt;
+    if (IsKeyDown(KEY_S)) player->pos.y += player->speed * dt;
+    if (IsKeyDown(KEY_A)) player->pos.x -= player->speed * dt;
+    if (IsKeyDown(KEY_D)) player->pos.x += player->speed * dt;
+
+    // Add movement bounds
+    if (player->pos.x > screenwidth) {
+        player->pos.x = screenwidth;
     }
-    // Bounce off left
-    else if (pos->x < 0) {
-        pos ->x = 0;
-        vel->x = 1.0;
+    else if (player->pos.x < 0) {
+        player->pos.x = 0;   
+    }
+
+    if (player->pos.y < player->upper_y) {
+        player->pos.y = player->upper_y;
+    }
+    else if (player->pos.y > screenheight) {
+        player->pos.y = screenheight;
     }
 }
 
@@ -128,4 +140,81 @@ void EnemiesMove(Enemy enemies[], float dt, int screenwidth, int screenheight) {
             enemies[i].vel.x = 1.0;
         }
     }
+}
+
+void LoadLevel(int level, Enemy enemies[], int *enemyCount, int screenwidth, int screenheight) {
+    // Vary enemy count based on level
+    switch (level) {
+        case 1:
+            *enemyCount = 10;
+            break;
+        case 2:
+            *enemyCount = 20;
+            break;
+        case 3:
+            *enemyCount = 30;
+            break;
+        case 4:
+            *enemyCount = 40;
+    }
+
+    // Randomize enemy stats
+    for (int i=0; i<*enemyCount; i++) {
+        enemies[i].pos = (Vector2) {GetRandomValue(0, screenwidth), GetRandomValue(0, screenheight*0.7f)};
+
+        // Cant randomize velocity direction between -1 and 1 (could get 0). Instead, convert 2 outcomes
+        float dirx;
+        if (GetRandomValue(0, 1) == 0) {
+            dirx = -1;
+        }
+        else {
+            dirx = 1;
+        }
+        enemies[i].vel = (Vector2) {dirx, 0};
+        enemies[i].speed = GetRandomValue(100, 300);
+    }
+}
+
+void TitleScreenUpdate(GameScreen *currentScreen, int screenwidth, int screenheight) {
+    // Title
+    char title[] = "TEST NAME";
+    int fontSize = 60;
+    int titleWidth = MeasureText(title, fontSize);
+    int posX = (screenwidth - titleWidth)/2;
+    int posY = screenheight * 0.2;
+    DrawText(title, posX, posY, fontSize, WHITE);
+
+    // Write instructions
+    char instructions[] = "Press SPACE to start!";
+    int instructionsFontSize = 20;
+    int instructionsWidth = MeasureText(instructions, instructionsFontSize);
+    int instructX = (screenwidth - instructionsWidth)/2;
+    int instructY = screenheight * 0.7;
+    DrawText(instructions, instructX, instructY, instructionsFontSize, GREEN);
+    if (IsKeyDown(KEY_SPACE)) {
+        *currentScreen = SCREEN_PLAYING;
+    }
+}
+
+void GameplayUpdate(Player *player, Enemy enemies[], int enemyCount, float dt, int screenwidth, int screenheight) {
+    PlayerMove(player, dt, screenwidth, screenheight);
+    EnemiesMove(enemies, dt, screenwidth, screenheight);
+    // Draw player
+    DrawCircleV(player->pos, 20, RED);
+    // Draw all enemies
+    for (int i=0; i<enemyCount; i++) {
+        DrawCircleV(enemies[i].pos, 10, BLUE);
+    }
+}
+
+void LevelTransitionUpdate() {
+
+}
+
+void UpgradesUpdate() {
+
+}
+
+void GameOverUpdate() {
+
 }

@@ -42,8 +42,14 @@ gcc main.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o main && ./main
 
 # CURRENT PROGRESS NOTES
 - Made automove functionality
+- Remove automove
+- Complete player movement
+- Beginnings of level design
+- Title Screen (Good enough for now)
 
 # FUTURE TODO's (No particular order)
-- Enemies
+- Function to check if level is done.
+- Transition screens
 - Shoot mechanic
-- Collision 
+- Collision
+- 
